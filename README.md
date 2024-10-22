@@ -1,24 +1,10 @@
-# killbill-stripe-plugin
+# killbill-bigcommerce-plugin
 ![Maven Central](https://img.shields.io/maven-central/v/org.kill-bill.billing.plugin.java/stripe-plugin?color=blue&label=Maven%20Central)
 
 Plugin to use [Stripe](https://stripe.com/) as a gateway.
 
 A full end-to-end integration demo is available [here](https://github.com/killbill/killbill-stripe-demo).
 
-## Kill Bill compatibility
-
-| Plugin version | Kill Bill version | Stripe version                                            |
-|---------------:|------------------:| --------------------------------------------------------: |
-|          1.x.y |            0.14.z | [2015-02-18](https://stripe.com/docs/upgrades#2015-02-18) |
-|          3.x.y |            0.16.z | [2015-02-18](https://stripe.com/docs/upgrades#2015-02-18) |
-|          4.x.y |            0.18.z | [2015-02-18](https://stripe.com/docs/upgrades#2015-02-18) |
-|          5.x.y |            0.19.z | [2015-02-18](https://stripe.com/docs/upgrades#2015-02-18) |
-|          6.x.y |            0.20.z | [2015-02-18](https://stripe.com/docs/upgrades#2015-02-18) |
-|          7.0.y |            0.22.z | [2019-12-03](https://stripe.com/docs/upgrades#2019-12-03) |
-|          7.1.y |            0.22.z | [2019-12-03](https://stripe.com/docs/upgrades#2019-12-03) |
-|          7.2.y |            0.22.z | [2020-08-27](https://stripe.com/docs/upgrades#2020-08-27) |
-|          7.3.y |            0.22.z | [2020-08-27](https://stripe.com/docs/upgrades#2020-08-27) |
-|          8.0.y |            0.24.z | [2020-08-27](https://stripe.com/docs/upgrades#2020-08-27) |
 
 ### Release notes
 

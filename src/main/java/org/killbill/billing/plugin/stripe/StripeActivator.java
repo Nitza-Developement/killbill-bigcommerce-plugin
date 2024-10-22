@@ -38,7 +38,7 @@ import com.stripe.Stripe;
 
 public class StripeActivator extends KillbillActivatorBase {
 
-    public static final String PLUGIN_NAME = "stripe-plugin";
+    public static final String PLUGIN_NAME = "bigcommerce-plugin";
 
     private static final Logger logger = LoggerFactory.getLogger(StripeActivator.class);
 

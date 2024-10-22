@@ -23,21 +23,21 @@
         <version>0.146.35</version>
     </parent>
     <groupId>org.kill-bill.billing.plugin.java</groupId>
-    <artifactId>stripe-plugin</artifactId>
-    <version>8.0.4-SNAPSHOT</version>
+    <artifactId>bigcommerce-plugin</artifactId>
+    <version>1.0.0-SNAPSHOT</version>
     <packaging>bundle</packaging>
-    <name>Kill Bill Stripe plugin</name>
-    <description>Kill Bill Stripe plugin</description>
-    <url>http://github.com/killbill/killbill-stripe-plugin</url>
+    <name>Kill Bill BigCommerce plugin</name>
+    <description>Kill Bill BigCommerce plugin</description>
+    <url>https://github.com/Nitza-Developement/killbill-bigcommerce-plugin.git</url>
     <scm>
-        <connection>scm:git:git://github.com/killbill/killbill-stripe-plugin.git</connection>
-        <developerConnection>scm:git:git@github.com:killbill/killbill-stripe-plugin.git</developerConnection>
+        <connection>scm:git:git://github.com/Nitza-Developement/killbill-bigcommerce-plugin.git</connection>
+        <developerConnection>scm:git@github.com:Nitza-Developement/killbill-bigcommerce-plugin.git</developerConnection>
         <tag>HEAD</tag>
-        <url>http://github.com/killbill/killbill-stripe-plugin/tree/master</url>
+        <url>https://github.com/Nitza-Developement/killbill-bigcommerce-plugin/tree/master</url>
     </scm>
     <issueManagement>
         <system>Github</system>
-        <url>https://github.com/killbill/killbill-stripe-plugin/issues</url>
+        <url>https://github.com/Nitza-Developement/killbill-bigcommerce-plugin/issues</url>
     </issueManagement>
     <properties>
         <check.fail-spotbugs>true</check.fail-spotbugs>
