@@ -14,7 +14,6 @@
  * License for the specific language governing permissions and limitations
  * under the License.
  */
-
 package org.killbill.billing.plugin.stripe;
 
 import java.util.List;
@@ -49,7 +48,8 @@ public class ExpiredPaymentPolicy {
             return null;
         }
 
-        final StripePaymentTransactionInfoPlugin transaction = (StripePaymentTransactionInfoPlugin) latestTransaction(paymentTransactions);
+        final StripePaymentTransactionInfoPlugin transaction = (StripePaymentTransactionInfoPlugin) latestTransaction(
+                paymentTransactions);
         if (transaction.getCreatedDate() == null) {
             return null;
         }
@@ -64,14 +64,15 @@ public class ExpiredPaymentPolicy {
         return null;
     }
 
-    private PaymentTransactionInfoPlugin latestTransaction(final List<PaymentTransactionInfoPlugin> paymentTransactions) {
+    private PaymentTransactionInfoPlugin latestTransaction(
+            final List<PaymentTransactionInfoPlugin> paymentTransactions) {
         return Iterables.getLast(paymentTransactions);
     }
 
     private boolean containOnlyAuthsOrPurchases(final List<PaymentTransactionInfoPlugin> transactions) {
         for (final PaymentTransactionInfoPlugin transaction : transactions) {
             if (transaction.getTransactionType() != TransactionType.AUTHORIZE &&
-                transaction.getTransactionType() != TransactionType.PURCHASE) {
+                    transaction.getTransactionType() != TransactionType.PURCHASE) {
                 return false;
             }
         }
@@ -83,12 +84,14 @@ public class ExpiredPaymentPolicy {
             return transaction.getCreatedDate().plus(stripeProperties.getPendingPaymentExpirationPeriod(null));
         }
 
-        final Map stripeResponseAdditionalData = StripeDao.fromAdditionalData(transaction.getStripeResponseRecord().getAdditionalData());
+        final Map stripeResponseAdditionalData = StripeDao
+                .fromAdditionalData(transaction.getStripeResponseRecord().getAdditionalData());
 
         if (is3ds(stripeResponseAdditionalData)) {
             return transaction.getCreatedDate().plus(stripeProperties.getPending3DsPaymentExpirationPeriod());
         } else if (isHppBuildFormTransaction(stripeResponseAdditionalData)) {
-            return transaction.getCreatedDate().plus(stripeProperties.getPendingHppPaymentWithoutCompletionExpirationPeriod());
+            return transaction.getCreatedDate()
+                    .plus(stripeProperties.getPendingHppPaymentWithoutCompletionExpirationPeriod());
         }
 
         final String paymentMethod = getPaymentMethod(stripeResponseAdditionalData);
@@ -105,11 +108,13 @@ public class ExpiredPaymentPolicy {
     }
 
     private boolean isHppCompletionTransaction(final Map stripeResponseAdditionalData) {
-        return Boolean.valueOf(MoreObjects.firstNonNull(stripeResponseAdditionalData.get(PROPERTY_HPP_COMPLETION), false).toString());
+        return Boolean.valueOf(
+                MoreObjects.firstNonNull(stripeResponseAdditionalData.get(PROPERTY_HPP_COMPLETION), false).toString());
     }
 
     private boolean isHppPayment(final Map stripeResponseAdditionalData) {
-        return Boolean.valueOf(MoreObjects.firstNonNull(stripeResponseAdditionalData.get(PROPERTY_FROM_HPP), false).toString());
+        return Boolean.valueOf(
+                MoreObjects.firstNonNull(stripeResponseAdditionalData.get(PROPERTY_FROM_HPP), false).toString());
     }
 
     private String getPaymentMethod(final Map stripeResponseAdditionalData) {

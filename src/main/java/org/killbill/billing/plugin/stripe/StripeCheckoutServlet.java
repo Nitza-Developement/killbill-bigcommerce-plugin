@@ -14,7 +14,6 @@
  * License for the specific language governing permissions and limitations
  * under the License.
  */
-
 package org.killbill.billing.plugin.stripe;
 
 import java.util.List;
@@ -54,30 +53,34 @@ public class StripeCheckoutServlet extends PluginHealthcheck {
 
     @Inject
     public StripeCheckoutServlet(final OSGIKillbillClock clock,
-                                 final StripePaymentPluginApi stripePaymentPluginApi) {
+            final StripePaymentPluginApi stripePaymentPluginApi) {
         this.clock = clock;
         this.stripePaymentPluginApi = stripePaymentPluginApi;
     }
 
     @POST
     public Result createSession(@Named("kbAccountId") final UUID kbAccountId,
-                                @Named("successUrl") final Optional<String> successUrl,
-                                @Named("cancelUrl") final Optional<String> cancelUrl,
-                                @Named("kbInvoiceId") final Optional<String> kbInvoiceId,
-                                @Named("paymentMethodTypes") final Optional<List<String>> paymentMethodTypes,
-                                @Local @Named("killbill_tenant") final Tenant tenant) throws JsonProcessingException, PaymentPluginApiException {
-        final CallContext context = new PluginCallContext(StripeActivator.PLUGIN_NAME, clock.getClock().getUTCNow(), kbAccountId, tenant.getId());
+            @Named("successUrl") final Optional<String> successUrl,
+            @Named("cancelUrl") final Optional<String> cancelUrl,
+            @Named("kbInvoiceId") final Optional<String> kbInvoiceId,
+            @Named("paymentMethodTypes") final Optional<List<String>> paymentMethodTypes,
+            @Local @Named("killbill_tenant") final Tenant tenant)
+            throws JsonProcessingException, PaymentPluginApiException {
+        final CallContext context = new PluginCallContext(StripeActivator.PLUGIN_NAME, clock.getClock().getUTCNow(),
+                kbAccountId, tenant.getId());
         final ImmutableList<PluginProperty> customFields = ImmutableList.of(
                 new PluginProperty("kb_account_id", kbAccountId.toString(), false),
                 new PluginProperty("kb_invoice_id", kbInvoiceId.orElse(null), false),
-                new PluginProperty("success_url", successUrl.orElse("https://example.com/success?sessionId={CHECKOUT_SESSION_ID}"), false),
+                new PluginProperty("success_url",
+                        successUrl.orElse("https://example.com/success?sessionId={CHECKOUT_SESSION_ID}"), false),
                 new PluginProperty("cancel_url", cancelUrl.orElse("https://example.com/cancel"), false),
                 new PluginProperty("payment_method_types", paymentMethodTypes.orElse(null), false));
-        final HostedPaymentPageFormDescriptor hostedPaymentPageFormDescriptor = stripePaymentPluginApi.buildFormDescriptor(kbAccountId,
-                                                                                                                           customFields,
-                                                                                                                           ImmutableList.of(),
-                                                                                                                           context);
+        final HostedPaymentPageFormDescriptor hostedPaymentPageFormDescriptor = stripePaymentPluginApi
+                .buildFormDescriptor(kbAccountId,
+                        customFields,
+                        ImmutableList.of(),
+                        context);
         return Results.with(hostedPaymentPageFormDescriptor, Status.CREATED)
-                      .type(MediaType.json);
+                .type(MediaType.json);
     }
 }

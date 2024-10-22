@@ -14,7 +14,6 @@
  * License for the specific language governing permissions and limitations
  * under the License.
  */
-
 package org.killbill.billing.plugin.stripe;
 
 import java.util.List;
@@ -34,18 +33,18 @@ public class StripePaymentMethodPlugin extends PluginPaymentMethodPlugin {
         final String externalPaymentMethodId = (String) additionalData.get("id");
 
         return new StripePaymentMethodPlugin(UUID.fromString(stripePaymentMethodsRecord.getKbPaymentMethodId()),
-                                             externalPaymentMethodId,
-                                             stripePaymentMethodsRecord.getIsDefault() == StripeDao.TRUE,
-                                             PluginProperties.buildPluginProperties(additionalData));
+                externalPaymentMethodId,
+                stripePaymentMethodsRecord.getIsDefault() == StripeDao.TRUE,
+                PluginProperties.buildPluginProperties(additionalData));
     }
 
     public StripePaymentMethodPlugin(final UUID kbPaymentMethodId,
-                                     final String externalPaymentMethodId,
-                                     final boolean isDefault,
-                                     final List<PluginProperty> properties) {
+            final String externalPaymentMethodId,
+            final boolean isDefault,
+            final List<PluginProperty> properties) {
         super(kbPaymentMethodId,
-              externalPaymentMethodId,
-              isDefault,
-              properties);
+                externalPaymentMethodId,
+                isDefault,
+                properties);
     }
 }

@@ -14,7 +14,6 @@
  * License for the specific language governing permissions and limitations
  * under the License.
  */
-
 package org.killbill.billing.plugin.stripe;
 
 import java.util.Properties;
@@ -22,13 +21,14 @@ import java.util.Properties;
 import org.killbill.billing.osgi.libs.killbill.OSGIKillbillAPI;
 import org.killbill.billing.plugin.api.notification.PluginTenantConfigurableConfigurationHandler;
 
-public class StripeConfigPropertiesConfigurationHandler extends PluginTenantConfigurableConfigurationHandler<StripeConfigProperties> {
+public class StripeConfigPropertiesConfigurationHandler
+        extends PluginTenantConfigurableConfigurationHandler<StripeConfigProperties> {
 
     private final String region;
 
     public StripeConfigPropertiesConfigurationHandler(final String pluginName,
-                                                      final OSGIKillbillAPI osgiKillbillAPI,
-                                                      final String region) {
+            final OSGIKillbillAPI osgiKillbillAPI,
+            final String region) {
         super(pluginName, osgiKillbillAPI);
         this.region = region;
     }

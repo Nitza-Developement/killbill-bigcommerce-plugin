@@ -14,7 +14,6 @@
  * License for the specific language governing permissions and limitations
  * under the License.
  */
-
 package org.killbill.billing.plugin.stripe;
 
 import java.util.HashMap;
@@ -42,7 +41,8 @@ public class StripeHealthcheck implements Healthcheck {
 
     private final StripeConfigPropertiesConfigurationHandler stripeConfigPropertiesConfigurationHandler;
 
-    public StripeHealthcheck(final StripeConfigPropertiesConfigurationHandler stripeConfigPropertiesConfigurationHandler) {
+    public StripeHealthcheck(
+            final StripeConfigPropertiesConfigurationHandler stripeConfigPropertiesConfigurationHandler) {
         this.stripeConfigPropertiesConfigurationHandler = stripeConfigPropertiesConfigurationHandler;
     }
 
@@ -53,7 +53,8 @@ public class StripeHealthcheck implements Healthcheck {
             return HealthStatus.healthy("Stripe OK");
         } else {
             // Specifying the tenant lets you also validate the tenant configuration
-            final StripeConfigProperties stripeConfigProperties = stripeConfigPropertiesConfigurationHandler.getConfigurable(tenant.getId());
+            final StripeConfigProperties stripeConfigProperties = stripeConfigPropertiesConfigurationHandler
+                    .getConfigurable(tenant.getId());
             return pingStripe(stripeConfigProperties);
         }
     }
@@ -65,10 +66,10 @@ public class StripeHealthcheck implements Healthcheck {
         final String url = String.format("%s%s", Stripe.getApiBase(), "/healthcheck");
         try {
             ApiResource.request(ApiResource.RequestMethod.GET,
-                                url,
-                                ImmutableMap.<String, Object>of(),
-                                StripeHealthcheckResponse.class,
-                                requestOptions);
+                    url,
+                    ImmutableMap.<String, Object>of(),
+                    StripeHealthcheckResponse.class,
+                    requestOptions);
             return HealthStatus.healthy("Stripe OK");
         } catch (final ApiException e) { // Not a JSON object anymore...
             if (e.getStatusCode() == 200) {
@@ -82,7 +83,6 @@ public class StripeHealthcheck implements Healthcheck {
             return HealthStatus.unHealthy("Stripe error: " + e.getMessage());
         }
     }
-
 
     public static class StripeHealthcheckResponse extends HashMap<String, Object> implements StripeObjectInterface {
 

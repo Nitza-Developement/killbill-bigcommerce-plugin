@@ -14,7 +14,6 @@
  * License for the specific language governing permissions and limitations
  * under the License.
  */
-
 package org.killbill.billing.plugin.stripe;
 
 import java.util.Hashtable;
@@ -32,12 +31,16 @@ import org.killbill.billing.plugin.core.resources.jooby.PluginApp;
 import org.killbill.billing.plugin.core.resources.jooby.PluginAppBuilder;
 import org.killbill.billing.plugin.stripe.dao.StripeDao;
 import org.osgi.framework.BundleContext;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import com.stripe.Stripe;
 
 public class StripeActivator extends KillbillActivatorBase {
 
-    public static final String PLUGIN_NAME = "killbill-stripe";
+    public static final String PLUGIN_NAME = "stripe-plugin";
+
+    private static final Logger logger = LoggerFactory.getLogger(StripeActivator.class);
 
     private StripeConfigPropertiesConfigurationHandler stripeConfigPropertiesConfigurationHandler;
 
@@ -45,15 +48,17 @@ public class StripeActivator extends KillbillActivatorBase {
     public void start(final BundleContext context) throws Exception {
         super.start(context);
 
+
         final StripeDao stripeDao = new StripeDao(dataSource.getDataSource());
 
         final String region = PluginEnvironmentConfig.getRegion(configProperties.getProperties());
         stripeConfigPropertiesConfigurationHandler = new StripeConfigPropertiesConfigurationHandler(PLUGIN_NAME,
-                                                                                                    killbillAPI,
-                                                                                                    region);
+                killbillAPI,
+                region);
 
-        final StripeConfigProperties stripeConfigProperties = stripeConfigPropertiesConfigurationHandler.createConfigurable(
-                configProperties.getProperties());
+        final StripeConfigProperties stripeConfigProperties = stripeConfigPropertiesConfigurationHandler
+                .createConfigurable(
+                        configProperties.getProperties());
         stripeConfigPropertiesConfigurationHandler.setDefaultConfigurable(stripeConfigProperties);
 
         // Expose the healthcheck, so other plugins can check on the Stripe status
@@ -63,24 +68,24 @@ public class StripeActivator extends KillbillActivatorBase {
         // Register the payment plugin
         Stripe.setAppInfo("Kill Bill", "7.2.0", "https://killbill.io");
         final StripePaymentPluginApi pluginApi = new StripePaymentPluginApi(stripeConfigPropertiesConfigurationHandler,
-                                                                            killbillAPI,
-                                                                            configProperties,
-                                                                            clock.getClock(),
-                                                                            stripeDao
-        );
+                killbillAPI,
+                configProperties,
+                clock.getClock(),
+                stripeDao);
         registerPaymentPluginApi(context, pluginApi);
 
         // Register the servlet
         final PluginApp pluginApp = new PluginAppBuilder(PLUGIN_NAME,
-                                                         killbillAPI,
-                                                         dataSource,
-                                                         super.clock,
-                                                         configProperties).withRouteClass(StripeHealthcheckServlet.class)
-                                                                          .withRouteClass(StripeCheckoutServlet.class)
-                                                                          .withService(stripeHealthcheck)
-                                                                          .withService(pluginApi)
-                                                                          .withService(clock)
-                                                                          .build();
+                killbillAPI,
+                dataSource,
+                super.clock,
+                configProperties).withRouteClass(StripeHealthcheckServlet.class)
+                .withRouteClass(StripeCheckoutServlet.class)
+                .withService(stripeHealthcheck)
+                .withService(pluginApi)
+                .withService(clock)
+                .build();
+
         final HttpServlet stripeServlet = PluginApp.createServlet(pluginApp);
         registerServlet(context, stripeServlet);
 
@@ -88,7 +93,8 @@ public class StripeActivator extends KillbillActivatorBase {
     }
 
     public void registerHandlers() {
-        final PluginConfigurationEventHandler handler = new PluginConfigurationEventHandler(stripeConfigPropertiesConfigurationHandler);
+        final PluginConfigurationEventHandler handler = new PluginConfigurationEventHandler(
+                stripeConfigPropertiesConfigurationHandler);
         dispatcher.registerEventHandlers(handler);
     }
 

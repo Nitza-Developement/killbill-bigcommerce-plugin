@@ -14,7 +14,6 @@
  * License for the specific language governing permissions and limitations
  * under the License.
  */
-
 package org.killbill.billing.plugin.stripe;
 
 import java.math.BigDecimal;
@@ -51,27 +50,29 @@ public class StripePaymentTransactionInfoPlugin extends PluginPaymentTransaction
         final String secondPaymentReferenceId = (String) additionalData.get("last_charge_authorization_code");
 
         final DateTime responseDate = new DateTime(stripeResponsesRecord.getCreatedDate()
-                                                                        .atZone(ZoneOffset.UTC)
-                                                                        .toInstant()
-                                                                        .toEpochMilli(), DateTimeZone.UTC);
+                .atZone(ZoneOffset.UTC)
+                .toInstant()
+                .toEpochMilli(), DateTimeZone.UTC);
         return new StripePaymentTransactionInfoPlugin(stripeResponsesRecord,
-                                                      UUID.fromString(stripeResponsesRecord.getKbPaymentId()),
-                                                      UUID.fromString(stripeResponsesRecord.getKbPaymentTransactionId()),
-                                                      TransactionType.valueOf(stripeResponsesRecord.getTransactionType()),
-                                                      stripeResponsesRecord.getAmount(),
-                                                      Strings.isNullOrEmpty(stripeResponsesRecord.getCurrency()) ? null : Currency.valueOf(stripeResponsesRecord.getCurrency()),
-                                                      getPaymentPluginStatus(additionalData),
-                                                      getGatewayError(additionalData),
-                                                      truncate(getGatewayErrorCode(additionalData)),
-                                                      firstPaymentReferenceId,
-                                                      secondPaymentReferenceId,
-                                                      responseDate,
-                                                      responseDate,
-                                                      PluginProperties.buildPluginProperties(additionalData));
+                UUID.fromString(stripeResponsesRecord.getKbPaymentId()),
+                UUID.fromString(stripeResponsesRecord.getKbPaymentTransactionId()),
+                TransactionType.valueOf(stripeResponsesRecord.getTransactionType()),
+                stripeResponsesRecord.getAmount(),
+                Strings.isNullOrEmpty(stripeResponsesRecord.getCurrency()) ? null
+                        : Currency.valueOf(stripeResponsesRecord.getCurrency()),
+                getPaymentPluginStatus(additionalData),
+                getGatewayError(additionalData),
+                truncate(getGatewayErrorCode(additionalData)),
+                firstPaymentReferenceId,
+                secondPaymentReferenceId,
+                responseDate,
+                responseDate,
+                PluginProperties.buildPluginProperties(additionalData));
     }
 
     private static PaymentPluginStatus getPaymentPluginStatus(final Map additionalData) {
-        final String overriddenTransactionStatus = (String) additionalData.get(StripePaymentPluginApi.PROPERTY_OVERRIDDEN_TRANSACTION_STATUS);
+        final String overriddenTransactionStatus = (String) additionalData
+                .get(StripePaymentPluginApi.PROPERTY_OVERRIDDEN_TRANSACTION_STATUS);
         if (overriddenTransactionStatus != null) {
             return PaymentPluginStatus.valueOf(overriddenTransactionStatus);
         }
@@ -96,8 +97,9 @@ public class StripePaymentTransactionInfoPlugin extends PluginPaymentTransaction
                 return PaymentPluginStatus.ERROR;
             }
             if ("requires_payment_method".equals(status)
-                && additionalData.get("last_payment_error") != null
-                && "payment_intent_authentication_failure".equals(((Map) additionalData.get("last_payment_error")).get("code"))) {
+                    && additionalData.get("last_payment_error") != null
+                    && "payment_intent_authentication_failure"
+                            .equals(((Map) additionalData.get("last_payment_error")).get("code"))) {
                 // Failed 3DS intent, but not yet cancelled
                 return PaymentPluginStatus.PENDING;
             }
@@ -118,7 +120,8 @@ public class StripePaymentTransactionInfoPlugin extends PluginPaymentTransaction
     }
 
     private static String getGatewayErrorCode(final Map additionalData) {
-        return (String) additionalData.getOrDefault("stripe_error_code", additionalData.get("last_charge_failure_code"));
+        return (String) additionalData.getOrDefault("stripe_error_code",
+                additionalData.get("last_charge_failure_code"));
     }
 
     private static String truncate(@Nullable final String string) {
@@ -132,32 +135,32 @@ public class StripePaymentTransactionInfoPlugin extends PluginPaymentTransaction
     }
 
     public StripePaymentTransactionInfoPlugin(final StripeResponsesRecord stripeResponsesRecord,
-                                              final UUID kbPaymentId,
-                                              final UUID kbTransactionPaymentPaymentId,
-                                              final TransactionType transactionType,
-                                              final BigDecimal amount,
-                                              final Currency currency,
-                                              final PaymentPluginStatus pluginStatus,
-                                              final String gatewayError,
-                                              final String gatewayErrorCode,
-                                              final String firstPaymentReferenceId,
-                                              final String secondPaymentReferenceId,
-                                              final DateTime createdDate,
-                                              final DateTime effectiveDate,
-                                              final List<PluginProperty> properties) {
+            final UUID kbPaymentId,
+            final UUID kbTransactionPaymentPaymentId,
+            final TransactionType transactionType,
+            final BigDecimal amount,
+            final Currency currency,
+            final PaymentPluginStatus pluginStatus,
+            final String gatewayError,
+            final String gatewayErrorCode,
+            final String firstPaymentReferenceId,
+            final String secondPaymentReferenceId,
+            final DateTime createdDate,
+            final DateTime effectiveDate,
+            final List<PluginProperty> properties) {
         super(kbPaymentId,
-              kbTransactionPaymentPaymentId,
-              transactionType,
-              amount,
-              currency,
-              pluginStatus,
-              gatewayError,
-              gatewayErrorCode,
-              firstPaymentReferenceId,
-              secondPaymentReferenceId,
-              createdDate,
-              effectiveDate,
-              properties);
+                kbTransactionPaymentPaymentId,
+                transactionType,
+                amount,
+                currency,
+                pluginStatus,
+                gatewayError,
+                gatewayErrorCode,
+                firstPaymentReferenceId,
+                secondPaymentReferenceId,
+                createdDate,
+                effectiveDate,
+                properties);
         this.stripeResponseRecord = stripeResponsesRecord;
     }
 
@@ -179,7 +182,8 @@ public class StripePaymentTransactionInfoPlugin extends PluginPaymentTransaction
 
         final StripePaymentTransactionInfoPlugin that = (StripePaymentTransactionInfoPlugin) o;
 
-        return stripeResponseRecord != null ? stripeResponseRecord.equals(that.stripeResponseRecord) : that.stripeResponseRecord == null;
+        return stripeResponseRecord != null ? stripeResponseRecord.equals(that.stripeResponseRecord)
+                : that.stripeResponseRecord == null;
     }
 
     @Override

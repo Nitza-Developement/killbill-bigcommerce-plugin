@@ -14,7 +14,6 @@
  * License for the specific language governing permissions and limitations
  * under the License.
  */
-
 package org.killbill.billing.plugin.stripe;
 
 import java.io.IOException;
@@ -200,17 +199,17 @@ public abstract class StripePluginProperties {
         additionalDataMap.put("status_code", stripeException.getStatusCode());
         additionalDataMap.put("message", stripeException.getMessage());
 
-        additionalDataMap.put(PROPERTY_OVERRIDDEN_TRANSACTION_STATUS, mapExceptionToCallResult(stripeException).toString());
+        additionalDataMap.put(PROPERTY_OVERRIDDEN_TRANSACTION_STATUS,
+                mapExceptionToCallResult(stripeException).toString());
 
         return additionalDataMap;
     }
-
 
     /**
      * Educated guess approach to transform exceptions into error status codes.
      */
     private static PaymentPluginStatus mapExceptionToCallResult(final Exception e) {
-        //noinspection ThrowableResultOfMethodCallIgnored
+        // noinspection ThrowableResultOfMethodCallIgnored
         final Throwable rootCause = Throwables.getRootCause(e);
         final String errorMessage = rootCause.getMessage();
         if (rootCause instanceof ConnectException) {
@@ -240,7 +239,8 @@ public abstract class StripePluginProperties {
         return PaymentPluginStatus.UNDEFINED;
     }
 
-    public static Map<String, Object> toAdditionalDataMap(final PaymentIntent stripePaymentIntent, @Nullable final Charge lastCharge) {
+    public static Map<String, Object> toAdditionalDataMap(final PaymentIntent stripePaymentIntent,
+            @Nullable final Charge lastCharge) {
         final Map<String, Object> additionalDataMap = new HashMap<String, Object>();
 
         additionalDataMap.put("amount", stripePaymentIntent.getAmount());
@@ -288,7 +288,8 @@ public abstract class StripePluginProperties {
             additionalDataMap.put("last_charge_paid", lastCharge.getPaid());
             additionalDataMap.put("last_charge_payment_method_id", lastCharge.getPaymentMethod());
             if (lastCharge.getPaymentMethodDetails() != null) {
-                additionalDataMap.put("last_charge_payment_method_type", lastCharge.getPaymentMethodDetails().getType());
+                additionalDataMap.put("last_charge_payment_method_type",
+                        lastCharge.getPaymentMethodDetails().getType());
             }
             additionalDataMap.put("last_charge_statement_descriptor", lastCharge.getStatementDescriptor());
             additionalDataMap.put("last_charge_status", lastCharge.getStatus());
@@ -316,13 +317,16 @@ public abstract class StripePluginProperties {
         additionalDataMap.put("on_behalf_of", stripeSetupIntent.getOnBehalfOf());
         additionalDataMap.put("payment_method_id", stripeSetupIntent.getPaymentMethod());
         final PaymentMethodOptions paymentMethodOptions = stripeSetupIntent.getPaymentMethodOptions();
-        if (paymentMethodOptions != null ) {
+        if (paymentMethodOptions != null) {
             final SetupIntent.PaymentMethodOptions.Card card = paymentMethodOptions.getCard();
             if (card != null) {
-                additionalDataMap.put("payment_method_options_card_request_three_d_secure", card.getRequestThreeDSecure());
+                additionalDataMap.put("payment_method_options_card_request_three_d_secure",
+                        card.getRequestThreeDSecure());
             }
-            // paymentMethodOptions also contains "sepa_debit" which contains "mandate_options" that currently has
-            // no properties, so it is ignored here (https://stripe.com/docs/api/setup_intents/object)
+            // paymentMethodOptions also contains "sepa_debit" which contains
+            // "mandate_options" that currently has
+            // no properties, so it is ignored here
+            // (https://stripe.com/docs/api/setup_intents/object)
         }
         additionalDataMap.put("payment_method_types", stripeSetupIntent.getPaymentMethodTypes());
         additionalDataMap.put("single_use_mandate_id", stripeSetupIntent.getSingleUseMandate());

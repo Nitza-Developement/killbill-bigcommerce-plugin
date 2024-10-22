@@ -82,13 +82,17 @@ public class StripeConfigProperties {
         this.apiBase = properties.getProperty(PROPERTY_PREFIX + "apiBase");
         this.proxyHost = properties.getProperty(PROPERTY_PREFIX + "proxyHost");
         this.proxyPort = Integer.parseInt(properties.getProperty(PROPERTY_PREFIX + "proxyPort", "-1"));
-        this.connectionTimeout = properties.getProperty(PROPERTY_PREFIX + "connectionTimeout", DEFAULT_CONNECTION_TIMEOUT);
+        this.connectionTimeout = properties.getProperty(PROPERTY_PREFIX + "connectionTimeout",
+                DEFAULT_CONNECTION_TIMEOUT);
         this.readTimeout = properties.getProperty(PROPERTY_PREFIX + "readTimeout", DEFAULT_READ_TIMEOUT);
         this.pendingPaymentExpirationPeriod = readPendingExpirationProperty(properties);
         this.pending3DsPaymentExpirationPeriod = read3DsPendingExpirationProperty(properties);
-        this.pendingHppPaymentWithoutCompletionExpirationPeriod = readPendingHppPaymentWithoutCompletionExpirationPeriod(properties);
-        this.chargeDescription = Ascii.truncate(MoreObjects.firstNonNull(properties.getProperty(PROPERTY_PREFIX + "chargeDescription"), "Kill Bill charge"), 22, "...");
-        this.chargeStatementDescriptor = Ascii.truncate(MoreObjects.firstNonNull(properties.getProperty(PROPERTY_PREFIX + "chargeStatementDescriptor"), "Kill Bill charge"), 22, "...");
+        this.pendingHppPaymentWithoutCompletionExpirationPeriod = readPendingHppPaymentWithoutCompletionExpirationPeriod(
+                properties);
+        this.chargeDescription = Ascii.truncate(MoreObjects.firstNonNull(
+                properties.getProperty(PROPERTY_PREFIX + "chargeDescription"), "Kill Bill charge"), 22, "...");
+        this.chargeStatementDescriptor = Ascii.truncate(MoreObjects.firstNonNull(
+                properties.getProperty(PROPERTY_PREFIX + "chargeStatementDescriptor"), "Kill Bill charge"), 22, "...");
         this.cancelOn3DSAuthorizationFailure = readCancelOn3DSAuthorizationFailure(properties);
     }
 
@@ -168,31 +172,35 @@ public class StripeConfigProperties {
         }
 
         final RequestOptionsBuilder requestOptionsBuilder = RequestOptions.builder()
-                                                                          .setConnectTimeout(Integer.parseInt(getConnectionTimeout()))
-                                                                          .setReadTimeout(Integer.parseInt(getReadTimeout()))
-                                                                          .setApiKey(getApiKey());
+                .setConnectTimeout(Integer.parseInt(getConnectionTimeout()))
+                .setReadTimeout(Integer.parseInt(getReadTimeout()))
+                .setApiKey(getApiKey());
         if (getProxyHost() != null && getProxyPort() != -1) {
-            requestOptionsBuilder.setConnectionProxy(new Proxy(Type.HTTP, new InetSocketAddress(getProxyHost(), getProxyPort())));
+            requestOptionsBuilder
+                    .setConnectionProxy(new Proxy(Type.HTTP, new InetSocketAddress(getProxyHost(), getProxyPort())));
         }
         return requestOptionsBuilder.build();
     }
 
     private Period readPendingExpirationProperty(final Properties properties) {
-        final String pendingExpirationPeriods = properties.getProperty(PROPERTY_PREFIX + "pendingPaymentExpirationPeriod");
+        final String pendingExpirationPeriods = properties
+                .getProperty(PROPERTY_PREFIX + "pendingPaymentExpirationPeriod");
         final Map<String, String> paymentMethodToExpirationPeriodString = new HashMap<String, String>();
         refillMap(paymentMethodToExpirationPeriodString, pendingExpirationPeriods);
         // No per-payment method override, just a global setting
         if (pendingExpirationPeriods != null && paymentMethodToExpirationPeriodString.isEmpty()) {
             try {
                 return Period.parse(pendingExpirationPeriods);
-            } catch (final IllegalArgumentException e) { /* Ignore */ }
+            } catch (final IllegalArgumentException e) {
+                /* Ignore */ }
         }
 
         // User has defined per-payment method overrides
         for (final Entry<String, String> entry : paymentMethodToExpirationPeriodString.entrySet()) {
             try {
                 paymentMethodToExpirationPeriod.put(entry.getKey().toLowerCase(), Period.parse(entry.getValue()));
-            } catch (final IllegalArgumentException e) { /* Ignore */ }
+            } catch (final IllegalArgumentException e) {
+                /* Ignore */ }
         }
 
         return Period.parse(DEFAULT_PENDING_PAYMENT_EXPIRATION_PERIOD);
@@ -203,18 +211,21 @@ public class StripeConfigProperties {
         if (value != null) {
             try {
                 return Period.parse(value);
-            } catch (IllegalArgumentException e) { /* Ignore */ }
+            } catch (IllegalArgumentException e) {
+                /* Ignore */ }
         }
 
         return Period.parse(DEFAULT_PENDING_3DS_PAYMENT_EXPIRATION_PERIOD);
     }
 
     private Period readPendingHppPaymentWithoutCompletionExpirationPeriod(final Properties properties) {
-        final String value = properties.getProperty(PROPERTY_PREFIX + "pendingHppPaymentWithoutCompletionExpirationPeriod");
+        final String value = properties
+                .getProperty(PROPERTY_PREFIX + "pendingHppPaymentWithoutCompletionExpirationPeriod");
         if (value != null) {
             try {
                 return Period.parse(value);
-            } catch (final IllegalArgumentException e) { /* Ignore */ }
+            } catch (final IllegalArgumentException e) {
+                /* Ignore */ }
         }
 
         return Period.parse(DEFAULT_PENDING_HPP_PAYMENT_WITHOUT_COMPLETION_EXPIRATION_PERIOD);
@@ -222,8 +233,7 @@ public class StripeConfigProperties {
 
     private boolean readCancelOn3DSAuthorizationFailure(Properties properties) {
         return Boolean.parseBoolean(
-                properties.getProperty(PROPERTY_PREFIX + "cancelOn3DSAuthorizationFailure")
-        );
+                properties.getProperty(PROPERTY_PREFIX + "cancelOn3DSAuthorizationFailure"));
     }
 
     private synchronized void refillMap(final Map<String, String> map, final String stringToSplit) {

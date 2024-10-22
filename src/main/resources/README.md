@@ -1,7 +1,7 @@
 #!/bin/sh
 
 # In order to generate the Jooq classes either copy and paste the code below or run this through "sh" like:
-# sh ./src/main/resources/README.txt
+# sh ./src/main/resources/README.md
 
 # Load the DDL schema in MySQL
 DDL_DIR="`dirname \"$0\"`"

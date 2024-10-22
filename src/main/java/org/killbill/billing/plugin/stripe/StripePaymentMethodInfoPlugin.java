@@ -14,7 +14,6 @@
  * License for the specific language governing permissions and limitations
  * under the License.
  */
-
 package org.killbill.billing.plugin.stripe;
 
 import java.util.UUID;
@@ -27,18 +26,18 @@ public class StripePaymentMethodInfoPlugin extends PluginPaymentMethodInfoPlugin
 
     public static StripePaymentMethodInfoPlugin build(final StripePaymentMethodsRecord stripePaymentMethodsRecord) {
         return new StripePaymentMethodInfoPlugin(UUID.fromString(stripePaymentMethodsRecord.getKbAccountId()),
-                                                 UUID.fromString(stripePaymentMethodsRecord.getKbPaymentMethodId()),
-                                                 stripePaymentMethodsRecord.getIsDefault() == StripeDao.TRUE,
-                                                 stripePaymentMethodsRecord.getStripeId());
+                UUID.fromString(stripePaymentMethodsRecord.getKbPaymentMethodId()),
+                stripePaymentMethodsRecord.getIsDefault() == StripeDao.TRUE,
+                stripePaymentMethodsRecord.getStripeId());
     }
 
     public StripePaymentMethodInfoPlugin(final UUID accountId,
-                                         final UUID paymentMethodId,
-                                         final boolean isDefault,
-                                         final String externalPaymentMethodId) {
+            final UUID paymentMethodId,
+            final boolean isDefault,
+            final String externalPaymentMethodId) {
         super(accountId,
-              paymentMethodId,
-              isDefault,
-              externalPaymentMethodId);
+                paymentMethodId,
+                isDefault,
+                externalPaymentMethodId);
     }
 }
