@@ -36,8 +36,6 @@ import org.killbill.billing.plugin.core.config.PluginEnvironmentConfig;
 import org.killbill.billing.plugin.core.resources.jooby.PluginApp;
 import org.killbill.billing.plugin.core.resources.jooby.PluginAppBuilder;
 import org.osgi.framework.BundleContext;
-import org.osgi.util.tracker.ServiceTracker;
-import org.killbill.billing.invoice.plugin.api.InvoiceFormatterFactory;
 
 public class BcActivator extends KillbillActivatorBase {
 
@@ -50,8 +48,6 @@ public class BcActivator extends KillbillActivatorBase {
     private BcConfigurationHandler bcConfigurationHandler;
     private OSGIKillbillEventDispatcher.OSGIKillbillEventHandler killbillEventHandler;
 
-    private ServiceTracker<InvoiceFormatterFactory, InvoiceFormatterFactory> invoiceFormatterTracker;
-
     @Override
     public void start(final BundleContext context) throws Exception {
         super.start(context);
@@ -60,33 +56,39 @@ public class BcActivator extends KillbillActivatorBase {
 
         // Register an event listener for plugin configuration (optional)
         bcConfigurationHandler = new BcConfigurationHandler(region, PLUGIN_NAME, killbillAPI);
+
         final Properties globalConfiguration = bcConfigurationHandler
                 .createConfigurable(configProperties.getProperties());
+
         bcConfigurationHandler.setDefaultConfigurable(globalConfiguration);
 
-        // create a service tracker for a custom InvoiceFormatter service
-        invoiceFormatterTracker = new ServiceTracker<>(context, InvoiceFormatterFactory.class, null);
-        invoiceFormatterTracker.open();
-
-
         // Register an event listener (optional)
-        killbillEventHandler = new BcListener(killbillAPI, invoiceFormatterTracker, configProperties.getProperties());
+        killbillEventHandler = new BcListener(killbillAPI, configProperties.getProperties());
 
         // As an example, this plugin registers a PaymentPluginApi (this could be
         // changed to any other plugin api)
         final PaymentPluginApi paymentPluginApi = new BcPaymentPluginApi();
+
         registerPaymentPluginApi(context, paymentPluginApi);
 
-
-        // Expose a healthcheck (optional), so other plugins can check on the plugin status
+        // Expose a healthcheck (optional), so other plugins can check on the plugin
+        // status
         final Healthcheck healthcheck = new BcHealthcheck();
+
         registerHealthcheck(context, healthcheck);
 
         // Register a servlet (optional)
-        final PluginApp pluginApp = new PluginAppBuilder(PLUGIN_NAME, killbillAPI, dataSource, super.clock,
-                                                         configProperties).withRouteClass(BcServlet.class)
-                                                                          .withRouteClass(BcHealthcheckServlet.class).withService(healthcheck).build();
+        final PluginApp pluginApp = new PluginAppBuilder(
+                PLUGIN_NAME,
+                killbillAPI,
+                dataSource,
+                super.clock,
+                configProperties).withRouteClass(BcServlet.class)
+                .withRouteClass(BcHealthcheckServlet.class)
+                .withService(healthcheck).build();
+
         final HttpServlet httpServlet = PluginApp.createServlet(pluginApp);
+
         registerServlet(context, httpServlet);
 
         registerHandlers();
@@ -103,7 +105,7 @@ public class BcActivator extends KillbillActivatorBase {
                 bcConfigurationHandler);
 
         dispatcher.registerEventHandlers(configHandler,
-                                         (OSGIFrameworkEventHandler) () -> dispatcher.registerEventHandlers(killbillEventHandler));
+                (OSGIFrameworkEventHandler) () -> dispatcher.registerEventHandlers(killbillEventHandler));
     }
 
     private void registerServlet(final BundleContext context, final Servlet servlet) {
