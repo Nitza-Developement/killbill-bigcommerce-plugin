@@ -25,7 +25,6 @@ import java.util.Properties;
 import javax.servlet.Servlet;
 import javax.servlet.http.HttpServlet;
 
-import org.killbill.billing.invoice.plugin.api.InvoicePluginApi;
 import org.killbill.billing.osgi.api.Healthcheck;
 import org.killbill.billing.osgi.api.OSGIPluginProperties;
 import org.killbill.billing.osgi.libs.killbill.KillbillActivatorBase;
@@ -50,7 +49,6 @@ public class BcActivator extends KillbillActivatorBase {
 
     private BcConfigurationHandler bcConfigurationHandler;
     private OSGIKillbillEventDispatcher.OSGIKillbillEventHandler killbillEventHandler;
-    private MetricsGeneratorExample metricsGenerator;
 
     private ServiceTracker<InvoiceFormatterFactory, InvoiceFormatterFactory> invoiceFormatterTracker;
 
@@ -79,17 +77,10 @@ public class BcActivator extends KillbillActivatorBase {
         final PaymentPluginApi paymentPluginApi = new BcPaymentPluginApi();
         registerPaymentPluginApi(context, paymentPluginApi);
 
-        // Expose metrics (optional)
-        metricsGenerator = new MetricsGeneratorExample(metricRegistry);
-        metricsGenerator.start();
 
         // Expose a healthcheck (optional), so other plugins can check on the plugin status
         final Healthcheck healthcheck = new BcHealthcheck();
         registerHealthcheck(context, healthcheck);
-
-        // This Plugin registers a InvoicePluginApi
-        final InvoicePluginApi invoicePluginApi = new BcInvoicePluginApi(killbillAPI, configProperties, null);
-        registerInvoicePluginApi(context, invoicePluginApi);
 
         // Register a servlet (optional)
         final PluginApp pluginApp = new PluginAppBuilder(PLUGIN_NAME, killbillAPI, dataSource, super.clock,
@@ -104,7 +95,6 @@ public class BcActivator extends KillbillActivatorBase {
     @Override
     public void stop(final BundleContext context) throws Exception {
         // Do additional work on shutdown (optional)
-        metricsGenerator.stop();
         super.stop(context);
     }
 
@@ -126,12 +116,6 @@ public class BcActivator extends KillbillActivatorBase {
         final Hashtable<String, String> props = new Hashtable<String, String>();
         props.put(OSGIPluginProperties.PLUGIN_NAME_PROP, PLUGIN_NAME);
         registrar.registerService(context, PaymentPluginApi.class, api, props);
-    }
-
-    private void registerInvoicePluginApi(final BundleContext context, final InvoicePluginApi api) {
-        final Hashtable<String, String> props = new Hashtable<String, String>();
-        props.put(OSGIPluginProperties.PLUGIN_NAME_PROP, PLUGIN_NAME);
-        registrar.registerService(context, InvoicePluginApi.class, api, props);
     }
 
     private void registerHealthcheck(final BundleContext context, final Healthcheck healthcheck) {

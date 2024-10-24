@@ -14,7 +14,7 @@
 #   under the License.
 
 # Variables
-PLUGIN_VERSION=1.0.16-SNAPSHOT
+PLUGIN_VERSION=1.0.17-SNAPSHOT
 PLUGIN_JAR=bigcommerce-plugin-$(PLUGIN_VERSION).jar
 KILLBILL_DOCKER_CONTAINER=killbill-dev
 

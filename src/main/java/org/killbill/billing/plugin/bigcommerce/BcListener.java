@@ -23,7 +23,6 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Properties;
 
-import org.joda.time.LocalDate;
 import org.killbill.billing.account.api.Account;
 import org.killbill.billing.account.api.AccountApiException;
 import org.killbill.billing.invoice.api.Invoice;
@@ -60,12 +59,15 @@ public class BcListener implements OSGIKillbillEventDispatcher.OSGIKillbillEvent
 
     @Override
     public void handleKillbillEvent(final ExtBusEvent killbillEvent) {
+        
         logger.info("Received event {} for object id {} of type {}",
                     killbillEvent.getEventType(),
                     killbillEvent.getObjectId(),
                     killbillEvent.getObjectType());
 
         final TenantContext context = new PluginTenantContext(killbillEvent.getAccountId(), killbillEvent.getTenantId());
+        
+        
         switch (killbillEvent.getEventType()) {
             //
             // Handle ACCOUNT_CREATION and ACCOUNT_CHANGE only for demo purpose and just print the account
@@ -73,41 +75,64 @@ public class BcListener implements OSGIKillbillEventDispatcher.OSGIKillbillEvent
             case ACCOUNT_CREATION:
             case ACCOUNT_CHANGE:
                 try {
+                    
                     final Account account = osgiKillbillAPI.getAccountUserApi().getAccountById(killbillEvent.getAccountId(), context);
+                    
                     logger.info("Account information: " + account);
+                
                 } catch (final AccountApiException e) {
+                   
                     logger.warn("Unable to find account", e);
                 }
                 break;
             case INVOICE_CREATION:
 
                 final Account account;
+                
                 try {
+                    
                     account = osgiKillbillAPI.getAccountUserApi().getAccountById(killbillEvent.getAccountId(), context);
+                
                 } catch (AccountApiException e) {
+                   
                     throw new RuntimeException(e);
                 }
-                final List<Invoice> invoices = osgiKillbillAPI.getInvoiceUserApi().getInvoicesByAccount(killbillEvent.getAccountId(), false, false, true, context);
-                logger.info("Invoices in hello-world-plugin {}: ",invoices.size());
+                final List<Invoice> invoices = osgiKillbillAPI.getInvoiceUserApi().getInvoicesByAccount(
+                    killbillEvent.getAccountId(), 
+                    false, 
+                    false,
+                     true, 
+                     context);
+
+                logger.info("Invoices in bigcommerce-plugin {}: ",invoices.size());
 
                 final String invoiceFormatterPluginName = configProperties.getProperty("org.killbill.template.invoiceFormatterFactoryPluginName");
+                
                 if(invoiceFormatterPluginName == null || invoiceFormatterPluginName.isEmpty()){
+                    
                     logger.info("Invoice formatter plugin not configured. set the org.killbill.template.invoiceFormatterFactoryPluginName property to configure it");
+                   
                     return;
                 }
 
                 final InvoiceFormatterFactory formatterFactory = (invoiceFormatterTracker != null ? invoiceFormatterTracker.getService() : null);
+                
                 Invoice invoice = invoices.get(0); //For demo purpose, we are only retrieving the formattedEndDate for the first invoice
                 //TODO Using null for parameters like catalogBundlePath,bundle, defaultBundle, etc. Update this to use correct values if possible or verify that using null values has no adverse effect
 
                 InvoiceFormatter invoiceFormatter = formatterFactory.createInvoiceFormatter(defaultLocale, null, invoice, Locale.forLanguageTag(account.getLocale()), osgiKillbillAPI.getCurrencyConversionApi(), null, null);
 
                 List<InvoiceItem> items = invoiceFormatter.getInvoiceItems();
-                logger.info("hello-world-plugin got items:{}",items.size());
+
+                logger.info("bigcommerce-plugin got items:{}",items.size());
+
                 for(InvoiceItem item:items) {
+
                     final InvoiceItemFormatter invoiceItemFormatter = (InvoiceItemFormatter)item;
+                    
                     final String formattedEndDate = invoiceItemFormatter.getFormattedEndDate();
-                    logger.info("hello-world-plugin formattedEndDate:{}",formattedEndDate);
+                    
+                    logger.info("bigcommerce-plugin formattedEndDate:{}",formattedEndDate);
                 }
             // Nothing
             default:

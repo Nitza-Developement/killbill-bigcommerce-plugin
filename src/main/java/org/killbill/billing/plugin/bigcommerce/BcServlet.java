@@ -48,12 +48,17 @@ public class BcServlet {
     public void hello(@Local @Named("killbill_tenant") final Optional<Tenant> tenant) {
         // Find me on http://127.0.0.1:8080/plugins/hello-world-plugin
         logger.info("Hello world");
+
         if(tenant != null && tenant.isPresent() ) {
+
         	logger.info("tenant is available");
+
         	Tenant t1 = tenant.get();
+
         	logger.info("tenant id:"+t1.getId());
         }
         else {
+            
         	logger.info("tenant is not available");
         }
     }
