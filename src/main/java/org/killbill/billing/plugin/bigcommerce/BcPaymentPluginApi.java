@@ -22,107 +22,243 @@ package org.killbill.billing.plugin.bigcommerce;
 import java.math.BigDecimal;
 import java.util.List;
 import java.util.UUID;
+import java.util.Properties;
+import org.joda.time.DateTime;
 
+import org.killbill.billing.osgi.libs.killbill.OSGIKillbillAPI;
 import org.killbill.billing.catalog.api.Currency;
 import org.killbill.billing.payment.api.PaymentMethodPlugin;
 import org.killbill.billing.payment.api.PluginProperty;
+import org.killbill.billing.payment.api.TransactionType;
 import org.killbill.billing.payment.plugin.api.GatewayNotification;
 import org.killbill.billing.payment.plugin.api.HostedPaymentPageFormDescriptor;
 import org.killbill.billing.payment.plugin.api.PaymentMethodInfoPlugin;
 import org.killbill.billing.payment.plugin.api.PaymentPluginApi;
 import org.killbill.billing.payment.plugin.api.PaymentPluginApiException;
 import org.killbill.billing.payment.plugin.api.PaymentTransactionInfoPlugin;
+import org.killbill.billing.payment.plugin.api.PaymentPluginStatus;
+import org.killbill.billing.account.api.Account;
+import org.killbill.billing.account.api.AccountApiException;
+import org.killbill.billing.invoice.api.Invoice;
+import org.killbill.billing.invoice.api.InvoiceItem;
+import org.killbill.billing.invoice.api.InvoiceApiException;
 import org.killbill.billing.util.callcontext.CallContext;
 import org.killbill.billing.util.callcontext.TenantContext;
 import org.killbill.billing.util.entity.Pagination;
 
-//
-// A 'real' payment plugin would of course implement this interface.
-//
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 public class BcPaymentPluginApi implements PaymentPluginApi {
 
+    private static final Logger logger = LoggerFactory.getLogger(BcPaymentPluginApi.class);
+    private OSGIKillbillAPI killbillAPI;
+    private final Properties configProperties;
+
+    public BcPaymentPluginApi(
+            final OSGIKillbillAPI killbillAPI,
+            final Properties configProperties) {
+        this.killbillAPI = killbillAPI;
+        this.configProperties = configProperties;
+
+    }
+
     @Override
-    public PaymentTransactionInfoPlugin authorizePayment(final UUID kbAccountId, final UUID kbPaymentId, final UUID kbTransactionId, final UUID kbPaymentMethodId, final BigDecimal amount, final Currency currency, final Iterable<PluginProperty> properties, final CallContext context) throws PaymentPluginApiException {
+    public PaymentTransactionInfoPlugin purchasePayment(
+            final UUID kbAccountId,
+            final UUID kbPaymentId,
+            final UUID kbTransactionId,
+            final UUID kbPaymentMethodId,
+            final BigDecimal amount,
+            final Currency currency,
+            final Iterable<PluginProperty> properties,
+            final CallContext context) throws PaymentPluginApiException {
+
+        logger.info("purchasePayment");
+        logger.info("Account Id: " + kbAccountId);
+        logger.info("Payment Id: " + kbPaymentId);
+        logger.info("Transaction Id: " + kbTransactionId);
+        logger.info("Payment Method Id: " + kbPaymentMethodId);
+        logger.info("Amount: " + amount);
+        logger.info("Currency: " + currency);
+        logger.info("Properties: " + properties);
+
+        PaymentTransactionInfoPlugin paymentTransactionInfoPlugin;
+
+        try {
+            final Account account = killbillAPI.getAccountUserApi().getAccountById(kbAccountId, context);
+
+            // Get external key = bigcommerce customer id
+            final String externalKey = account.getExternalKey();
+
+            // Get invoice Id
+
+            if (properties.iterator().hasNext()) {
+                final PluginProperty prop = properties.iterator().next();
+                UUID invoiceId = UUID.fromString(prop.getValue().toString());
+
+                // Get invoice data
+                Invoice invoice = killbillAPI.getInvoiceUserApi().getInvoice(invoiceId, context);
+
+                List<InvoiceItem> items = invoice.getInvoiceItems();
+
+                for (InvoiceItem invoiceItem : items) {
+
+                    logger.info("Product name: " + invoiceItem.getProductName());
+
+                }
+
+                // TODO : Hacer request al api flask
+
+                paymentTransactionInfoPlugin = new BcPaymentTransactionInfoPlugin(
+                        kbPaymentId,
+                        kbTransactionId,
+                        TransactionType.PURCHASE,
+                        amount,
+                        currency,
+                        PaymentPluginStatus.PROCESSED,
+                        null,
+                        null,
+                        null,
+                        null,
+                        new DateTime(),
+                        null,
+                        null);
+
+            } else
+                throw new InvoiceApiException(null, 0, "Invoice id not found");
+
+        } catch (AccountApiException | InvoiceApiException e) {
+
+            paymentTransactionInfoPlugin = new BcPaymentTransactionInfoPlugin(
+                    kbPaymentId,
+                    kbTransactionId,
+                    TransactionType.PURCHASE,
+                    amount,
+                    currency,
+                    PaymentPluginStatus.ERROR,
+                    e.getMessage(),
+                    String.valueOf(e.getCode()),
+                    null,
+                    null,
+                    new DateTime(),
+                    null,
+                    null);
+
+        }
+
+        return paymentTransactionInfoPlugin;
+    }
+
+    @Override
+    public void addPaymentMethod(final UUID kbAccountId, final UUID kbPaymentMethodId,
+            final PaymentMethodPlugin paymentMethodProps, final boolean setDefault,
+            final Iterable<PluginProperty> properties, final CallContext context) throws PaymentPluginApiException {
+
+        logger.info("Account Id: " + kbAccountId);
+        logger.info("Payment Method Id: " + kbPaymentMethodId);
+        logger.info("Payment Method: " + paymentMethodProps);
+        logger.info("Set Default: " + setDefault);
+        logger.info("Properties: " + properties);
+
+    }
+
+    @Override
+    public PaymentTransactionInfoPlugin authorizePayment(final UUID kbAccountId, final UUID kbPaymentId,
+            final UUID kbTransactionId, final UUID kbPaymentMethodId, final BigDecimal amount, final Currency currency,
+            final Iterable<PluginProperty> properties, final CallContext context) throws PaymentPluginApiException {
+
         return null;
     }
 
     @Override
-    public PaymentTransactionInfoPlugin capturePayment(final UUID kbAccountId, final UUID kbPaymentId, final UUID kbTransactionId, final UUID kbPaymentMethodId, final BigDecimal amount, final Currency currency, final Iterable<PluginProperty> properties, final CallContext context) throws PaymentPluginApiException {
+    public PaymentTransactionInfoPlugin capturePayment(final UUID kbAccountId, final UUID kbPaymentId,
+            final UUID kbTransactionId, final UUID kbPaymentMethodId, final BigDecimal amount, final Currency currency,
+            final Iterable<PluginProperty> properties, final CallContext context) throws PaymentPluginApiException {
         return null;
     }
 
     @Override
-    public PaymentTransactionInfoPlugin purchasePayment(final UUID kbAccountId, final UUID kbPaymentId, final UUID kbTransactionId, final UUID kbPaymentMethodId, final BigDecimal amount, final Currency currency, final Iterable<PluginProperty> properties, final CallContext context) throws PaymentPluginApiException {
+    public PaymentTransactionInfoPlugin voidPayment(final UUID kbAccountId, final UUID kbPaymentId,
+            final UUID kbTransactionId, final UUID kbPaymentMethodId, final Iterable<PluginProperty> properties,
+            final CallContext context) throws PaymentPluginApiException {
         return null;
     }
 
     @Override
-    public PaymentTransactionInfoPlugin voidPayment(final UUID kbAccountId, final UUID kbPaymentId, final UUID kbTransactionId, final UUID kbPaymentMethodId, final Iterable<PluginProperty> properties, final CallContext context) throws PaymentPluginApiException {
+    public PaymentTransactionInfoPlugin creditPayment(final UUID kbAccountId, final UUID kbPaymentId,
+            final UUID kbTransactionId, final UUID kbPaymentMethodId, final BigDecimal amount, final Currency currency,
+            final Iterable<PluginProperty> properties, final CallContext context) throws PaymentPluginApiException {
         return null;
     }
 
     @Override
-    public PaymentTransactionInfoPlugin creditPayment(final UUID kbAccountId, final UUID kbPaymentId, final UUID kbTransactionId, final UUID kbPaymentMethodId, final BigDecimal amount, final Currency currency, final Iterable<PluginProperty> properties, final CallContext context) throws PaymentPluginApiException {
+    public PaymentTransactionInfoPlugin refundPayment(final UUID kbAccountId, final UUID kbPaymentId,
+            final UUID kbTransactionId, final UUID kbPaymentMethodId, final BigDecimal amount, final Currency currency,
+            final Iterable<PluginProperty> properties, final CallContext context) throws PaymentPluginApiException {
         return null;
     }
 
     @Override
-    public PaymentTransactionInfoPlugin refundPayment(final UUID kbAccountId, final UUID kbPaymentId, final UUID kbTransactionId, final UUID kbPaymentMethodId, final BigDecimal amount, final Currency currency, final Iterable<PluginProperty> properties, final CallContext context) throws PaymentPluginApiException {
+    public List<PaymentTransactionInfoPlugin> getPaymentInfo(final UUID kbAccountId, final UUID kbPaymentId,
+            final Iterable<PluginProperty> properties, final TenantContext context) throws PaymentPluginApiException {
         return null;
     }
 
     @Override
-    public List<PaymentTransactionInfoPlugin> getPaymentInfo(final UUID kbAccountId, final UUID kbPaymentId, final Iterable<PluginProperty> properties, final TenantContext context) throws PaymentPluginApiException {
+    public Pagination<PaymentTransactionInfoPlugin> searchPayments(final String searchKey, final Long offset,
+            final Long limit, final Iterable<PluginProperty> properties, final TenantContext context)
+            throws PaymentPluginApiException {
         return null;
     }
 
     @Override
-    public Pagination<PaymentTransactionInfoPlugin> searchPayments(final String searchKey, final Long offset, final Long limit, final Iterable<PluginProperty> properties, final TenantContext context) throws PaymentPluginApiException {
+    public void deletePaymentMethod(final UUID kbAccountId, final UUID kbPaymentMethodId,
+            final Iterable<PluginProperty> properties, final CallContext context) throws PaymentPluginApiException {
+
+    }
+
+    @Override
+    public PaymentMethodPlugin getPaymentMethodDetail(final UUID kbAccountId, final UUID kbPaymentMethodId,
+            final Iterable<PluginProperty> properties, final TenantContext context) throws PaymentPluginApiException {
         return null;
     }
 
     @Override
-    public void addPaymentMethod(final UUID kbAccountId, final UUID kbPaymentMethodId, final PaymentMethodPlugin paymentMethodProps, final boolean setDefault, final Iterable<PluginProperty> properties, final CallContext context) throws PaymentPluginApiException {
+    public void setDefaultPaymentMethod(final UUID kbAccountId, final UUID kbPaymentMethodId,
+            final Iterable<PluginProperty> properties, final CallContext context) throws PaymentPluginApiException {
 
     }
 
     @Override
-    public void deletePaymentMethod(final UUID kbAccountId, final UUID kbPaymentMethodId, final Iterable<PluginProperty> properties, final CallContext context) throws PaymentPluginApiException {
-
-    }
-
-    @Override
-    public PaymentMethodPlugin getPaymentMethodDetail(final UUID kbAccountId, final UUID kbPaymentMethodId, final Iterable<PluginProperty> properties, final TenantContext context) throws PaymentPluginApiException {
+    public List<PaymentMethodInfoPlugin> getPaymentMethods(final UUID kbAccountId, final boolean refreshFromGateway,
+            final Iterable<PluginProperty> properties, final CallContext context) throws PaymentPluginApiException {
         return null;
     }
 
     @Override
-    public void setDefaultPaymentMethod(final UUID kbAccountId, final UUID kbPaymentMethodId, final Iterable<PluginProperty> properties, final CallContext context) throws PaymentPluginApiException {
-
-    }
-
-    @Override
-    public List<PaymentMethodInfoPlugin> getPaymentMethods(final UUID kbAccountId, final boolean refreshFromGateway, final Iterable<PluginProperty> properties, final CallContext context) throws PaymentPluginApiException {
+    public Pagination<PaymentMethodPlugin> searchPaymentMethods(final String searchKey, final Long offset,
+            final Long limit, final Iterable<PluginProperty> properties, final TenantContext context)
+            throws PaymentPluginApiException {
         return null;
     }
 
     @Override
-    public Pagination<PaymentMethodPlugin> searchPaymentMethods(final String searchKey, final Long offset, final Long limit, final Iterable<PluginProperty> properties, final TenantContext context) throws PaymentPluginApiException {
+    public void resetPaymentMethods(final UUID kbAccountId, final List<PaymentMethodInfoPlugin> paymentMethods,
+            final Iterable<PluginProperty> properties, final CallContext context) throws PaymentPluginApiException {
+
+    }
+
+    @Override
+    public HostedPaymentPageFormDescriptor buildFormDescriptor(final UUID kbAccountId,
+            final Iterable<PluginProperty> customFields, final Iterable<PluginProperty> properties,
+            final CallContext context) throws PaymentPluginApiException {
         return null;
     }
 
     @Override
-    public void resetPaymentMethods(final UUID kbAccountId, final List<PaymentMethodInfoPlugin> paymentMethods, final Iterable<PluginProperty> properties, final CallContext context) throws PaymentPluginApiException {
-
-    }
-
-    @Override
-    public HostedPaymentPageFormDescriptor buildFormDescriptor(final UUID kbAccountId, final Iterable<PluginProperty> customFields, final Iterable<PluginProperty> properties, final CallContext context) throws PaymentPluginApiException {
-        return null;
-    }
-
-    @Override
-    public GatewayNotification processNotification(final String notification, final Iterable<PluginProperty> properties, final CallContext context) throws PaymentPluginApiException {
+    public GatewayNotification processNotification(final String notification, final Iterable<PluginProperty> properties,
+            final CallContext context) throws PaymentPluginApiException {
         return null;
     }
 }

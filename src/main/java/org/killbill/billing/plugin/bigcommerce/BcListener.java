@@ -19,8 +19,6 @@
 
 package org.killbill.billing.plugin.bigcommerce;
 
-import java.util.Properties;
-
 import org.killbill.billing.account.api.Account;
 import org.killbill.billing.account.api.AccountApiException;
 import org.killbill.billing.notification.plugin.api.ExtBusEvent;
@@ -28,6 +26,7 @@ import org.killbill.billing.osgi.libs.killbill.OSGIKillbillAPI;
 import org.killbill.billing.osgi.libs.killbill.OSGIKillbillEventDispatcher;
 import org.killbill.billing.plugin.api.PluginTenantContext;
 import org.killbill.billing.util.callcontext.TenantContext;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -35,37 +34,25 @@ public class BcListener implements OSGIKillbillEventDispatcher.OSGIKillbillEvent
 
     private static final Logger logger = LoggerFactory.getLogger(BcListener.class);
 
-    private final OSGIKillbillAPI osgiKillbillAPI;
-    private final Properties configProperties;
+    private final OSGIKillbillAPI killbillAPI;
 
-    public BcListener(
-            final OSGIKillbillAPI killbillAPI,
-            Properties configProperties) {
-        this.osgiKillbillAPI = killbillAPI;
-        this.configProperties = configProperties;
+    public BcListener(final OSGIKillbillAPI killbillAPI) {
+        this.killbillAPI = killbillAPI;
     }
-
-    private static final String defaultLocale = "en_US";
 
     @Override
     public void handleKillbillEvent(final ExtBusEvent killbillEvent) {
 
-        logger.info("Received event {} for object id {} of type {}",
-                killbillEvent.getEventType(),
-                killbillEvent.getObjectId(),
-                killbillEvent.getObjectType());
-
-        final TenantContext context = new PluginTenantContext(killbillEvent.getAccountId(),
+        final TenantContext context = new PluginTenantContext(
+                killbillEvent.getAccountId(),
                 killbillEvent.getTenantId());
 
         switch (killbillEvent.getEventType()) {
-            //
-            // Handle ACCOUNT_CREATION
-            //
+
             case ACCOUNT_CREATION:
                 try {
 
-                    final Account account = osgiKillbillAPI.getAccountUserApi()
+                    final Account account = killbillAPI.getAccountUserApi()
                             .getAccountById(killbillEvent.getAccountId(), context);
 
                     logger.info("Account information: " + account);

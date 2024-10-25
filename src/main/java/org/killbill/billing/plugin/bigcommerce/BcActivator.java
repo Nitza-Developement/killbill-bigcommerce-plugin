@@ -63,7 +63,7 @@ public class BcActivator extends KillbillActivatorBase {
         bcConfigurationHandler.setDefaultConfigurable(globalConfiguration);
 
         // Register an event listener (optional)
-        killbillEventHandler = new BcListener(killbillAPI, configProperties.getProperties());
+        killbillEventHandler = new BcListener(killbillAPI);
 
         // As an example, this plugin registers a PaymentPluginApi (this could be
         // changed to any other plugin api)
