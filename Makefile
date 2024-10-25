@@ -14,7 +14,7 @@
 #   under the License.
 
 # Variables
-PLUGIN_VERSION=1.0.17-SNAPSHOT
+PLUGIN_VERSION := $(shell xmllint --xpath '/*[local-name()="project"]/*[local-name()="version"]/text()' pom.xml)
 PLUGIN_JAR=bigcommerce-plugin-$(PLUGIN_VERSION).jar
 KILLBILL_DOCKER_CONTAINER=killbill-dev
 
@@ -38,7 +38,7 @@ install:
 
 restart:
 	docker restart $(KILLBILL_DOCKER_CONTAINER)
-	echo -e "\e[32mFinished restarting Kill Bill container\e[0m"
+	echo -e "\e[32mFinished installation of plugin\e[0m"
 
 
 
