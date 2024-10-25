@@ -67,7 +67,7 @@ public class BcActivator extends KillbillActivatorBase {
 
         // As an example, this plugin registers a PaymentPluginApi (this could be
         // changed to any other plugin api)
-        final PaymentPluginApi paymentPluginApi = new BcPaymentPluginApi();
+        final PaymentPluginApi paymentPluginApi = new BcPaymentPluginApi(killbillAPI, configProperties.getProperties());
 
         registerPaymentPluginApi(context, paymentPluginApi);
 
