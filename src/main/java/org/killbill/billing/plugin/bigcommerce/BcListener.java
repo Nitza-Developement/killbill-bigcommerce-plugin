@@ -23,13 +23,11 @@ import java.util.Properties;
 
 import org.killbill.billing.account.api.Account;
 import org.killbill.billing.account.api.AccountApiException;
-import org.killbill.billing.invoice.plugin.api.InvoiceFormatterFactory;
 import org.killbill.billing.notification.plugin.api.ExtBusEvent;
 import org.killbill.billing.osgi.libs.killbill.OSGIKillbillAPI;
 import org.killbill.billing.osgi.libs.killbill.OSGIKillbillEventDispatcher;
 import org.killbill.billing.plugin.api.PluginTenantContext;
 import org.killbill.billing.util.callcontext.TenantContext;
-import org.osgi.util.tracker.ServiceTracker;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -38,10 +36,10 @@ public class BcListener implements OSGIKillbillEventDispatcher.OSGIKillbillEvent
     private static final Logger logger = LoggerFactory.getLogger(BcListener.class);
 
     private final OSGIKillbillAPI osgiKillbillAPI;
-
     private final Properties configProperties;
 
-    public BcListener(final OSGIKillbillAPI killbillAPI,
+    public BcListener(
+            final OSGIKillbillAPI killbillAPI,
             Properties configProperties) {
         this.osgiKillbillAPI = killbillAPI;
         this.configProperties = configProperties;
@@ -71,8 +69,6 @@ public class BcListener implements OSGIKillbillEventDispatcher.OSGIKillbillEvent
                             .getAccountById(killbillEvent.getAccountId(), context);
 
                     logger.info("Account information: " + account);
-
-
 
                 } catch (final AccountApiException e) {
 
