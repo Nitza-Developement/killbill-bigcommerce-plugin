@@ -39,10 +39,6 @@ import org.osgi.framework.BundleContext;
 
 public class BcActivator extends KillbillActivatorBase {
 
-    //
-    // Ideally that string should match the pluginName on the filesystem, but there
-    // is no enforcement
-    //
     public static final String PLUGIN_NAME = "bigcommerce-plugin";
 
     private BcConfigurationHandler bcConfigurationHandler;

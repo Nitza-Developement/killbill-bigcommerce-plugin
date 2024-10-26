@@ -20,10 +20,17 @@
 package org.killbill.billing.plugin.bigcommerce;
 
 import java.math.BigDecimal;
+import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.UUID;
 import java.util.Properties;
+
 import org.joda.time.DateTime;
+
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.JsonNode;
 
 import org.killbill.billing.osgi.libs.killbill.OSGIKillbillAPI;
 import org.killbill.billing.catalog.api.Currency;
@@ -89,41 +96,60 @@ public class BcPaymentPluginApi implements PaymentPluginApi {
             final Account account = killbillAPI.getAccountUserApi().getAccountById(kbAccountId, context);
 
             // Get external key = bigcommerce customer id
-            final String externalKey = account.getExternalKey();
-
-            // Get invoice Id
+            final Number externalKey = Integer.parseInt(account.getExternalKey());
 
             if (properties.iterator().hasNext()) {
+
                 final PluginProperty prop = properties.iterator().next();
+
                 UUID invoiceId = UUID.fromString(prop.getValue().toString());
 
-                // Get invoice data
                 Invoice invoice = killbillAPI.getInvoiceUserApi().getInvoice(invoiceId, context);
 
                 List<InvoiceItem> items = invoice.getInvoiceItems();
 
-                for (InvoiceItem invoiceItem : items) {
+                List<Map<String, Object>> products = new ArrayList<>();
 
-                    logger.info("Product name: " + invoiceItem.getProductName());
+                for (final InvoiceItem invoiceItem : items) {
+
+                    String productName = invoiceItem.getProductName();
+                    String prettyPlanName = invoiceItem.getPrettyPlanName();
+
+                    if (prettyPlanName != null && productName != null) {
+                        Map<String, Object> product = getProduct(productName, prettyPlanName);
+                        products.add(product);
+                    }
 
                 }
 
-                // TODO : Hacer request al api flask
+                final Map<String, Object> data = new HashMap<String, Object>();
 
-                paymentTransactionInfoPlugin = new BcPaymentTransactionInfoPlugin(
-                        kbPaymentId,
-                        kbTransactionId,
-                        TransactionType.PURCHASE,
-                        amount,
-                        currency,
-                        PaymentPluginStatus.PROCESSED,
-                        null,
-                        null,
-                        null,
-                        null,
-                        new DateTime(),
-                        null,
-                        null);
+                data.put("customer_id", externalKey);
+                data.put("products", products);
+
+                logger.info("DATA:" + data.toString());
+
+                final ApiClient apiClient = new ApiClient("http://127.0.0.1:8000");
+                final Integer status = apiClient.post(data);
+
+                if (status == 200) {
+                    paymentTransactionInfoPlugin = new BcPaymentTransactionInfoPlugin(
+                            kbPaymentId,
+                            kbTransactionId,
+                            TransactionType.PURCHASE,
+                            amount,
+                            currency,
+                            PaymentPluginStatus.PROCESSED,
+                            null,
+                            null,
+                            null,
+                            null,
+                            new DateTime(),
+                            null,
+                            null);
+                } else {
+                    throw new InvoiceApiException(null, 0, "Error in api");
+                }
 
             } else
                 throw new InvoiceApiException(null, 0, "Invoice id not found");
@@ -148,6 +174,24 @@ public class BcPaymentPluginApi implements PaymentPluginApi {
         }
 
         return paymentTransactionInfoPlugin;
+    }
+
+    public Map<String, Object> getProduct(final String productName, final String prettyPlanName) {
+
+        Integer quantity = 1;
+        Integer product = Integer.parseInt(productName.split("product-")[1]);
+
+        if (prettyPlanName.contains("BIANNUAL")) {
+            quantity = 6;
+        } else if (prettyPlanName.contains("QUARTERLY")) {
+            quantity = 3;
+        }
+
+        Map<String, Object> data = new HashMap<String, Object>();
+        data.put("product_id", product);
+        data.put("quantity", quantity);
+
+        return data;
     }
 
     @Override
