@@ -1,22 +1,3 @@
-/*
- * Copyright 2010-2014 Ning, Inc.
- * Copyright 2014-2020 Groupon, Inc
- * Copyright 2020-2020 Equinix, Inc
- * Copyright 2014-2020 The Billing Project, LLC
- *
- * The Billing Project licenses this file to you under the Apache License, version 2.0
- * (the "License"); you may not use this file except in compliance with the
- * License.  You may obtain a copy of the License at:
- *
- *    http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
- * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.  See the
- * License for the specific language governing permissions and limitations
- * under the License.
- */
-
 package org.killbill.billing.plugin.bigcommerce;
 
 import java.math.BigDecimal;
@@ -28,9 +9,6 @@ import java.util.UUID;
 import java.util.Properties;
 
 import org.joda.time.DateTime;
-
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.JsonNode;
 
 import org.killbill.billing.osgi.libs.killbill.OSGIKillbillAPI;
 import org.killbill.billing.catalog.api.Currency;
@@ -130,7 +108,7 @@ public class BcPaymentPluginApi implements PaymentPluginApi {
                 logger.info("DATA:" + data.toString());
 
                 final ApiClient apiClient = new ApiClient("http://127.0.0.1:8000");
-                final Integer status = apiClient.post(data);
+                final Integer status = apiClient.pay(data);
 
                 if (status == 200) {
                     paymentTransactionInfoPlugin = new BcPaymentTransactionInfoPlugin(
@@ -148,7 +126,7 @@ public class BcPaymentPluginApi implements PaymentPluginApi {
                             null,
                             null);
                 } else {
-                    throw new InvoiceApiException(null, 0, "Error in api");
+                    throw new InvoiceApiException(null, 0, "Payment of invoice failed in flask api");
                 }
 
             } else
@@ -170,7 +148,6 @@ public class BcPaymentPluginApi implements PaymentPluginApi {
                     new DateTime(),
                     null,
                     null);
-
         }
 
         return paymentTransactionInfoPlugin;
