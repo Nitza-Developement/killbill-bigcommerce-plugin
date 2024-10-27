@@ -1,6 +1,7 @@
 package org.killbill.billing.plugin.bigcommerce;
 
 import java.math.BigDecimal;
+import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -31,6 +32,8 @@ import org.killbill.billing.util.callcontext.CallContext;
 import org.killbill.billing.util.callcontext.TenantContext;
 import org.killbill.billing.util.entity.Pagination;
 
+import org.killbill.billing.plugin.bigcommerce.dao.BigcommerceDao;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -38,13 +41,13 @@ public class BcPaymentPluginApi implements PaymentPluginApi {
 
     private static final Logger logger = LoggerFactory.getLogger(BcPaymentPluginApi.class);
     private OSGIKillbillAPI killbillAPI;
-    private final Properties configProperties;
+    private final BigcommerceDao dao;
 
     public BcPaymentPluginApi(
             final OSGIKillbillAPI killbillAPI,
-            final Properties configProperties) {
+            final BigcommerceDao dao) {
         this.killbillAPI = killbillAPI;
-        this.configProperties = configProperties;
+        this.dao = dao;
 
     }
 
@@ -107,7 +110,15 @@ public class BcPaymentPluginApi implements PaymentPluginApi {
 
                 logger.info("DATA:" + data.toString());
 
-                final ApiClient apiClient = new ApiClient("http://127.0.0.1:8000");
+                String url;
+                try {
+                    url = dao.getUrl(context.getTenantId().toString());
+                } catch (SQLException e) {
+                    throw new InvoiceApiException(null, 0, e.getMessage());
+
+                }
+
+                final ApiClient apiClient = new ApiClient(url);
                 final Integer status = apiClient.pay(data);
 
                 if (status == 200) {

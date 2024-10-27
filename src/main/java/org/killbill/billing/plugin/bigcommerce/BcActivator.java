@@ -13,6 +13,7 @@ import org.killbill.billing.osgi.libs.killbill.OSGIKillbillEventDispatcher;
 import org.killbill.billing.osgi.libs.killbill.OSGIKillbillEventDispatcher.OSGIFrameworkEventHandler;
 import org.killbill.billing.payment.plugin.api.PaymentPluginApi;
 import org.killbill.billing.plugin.api.notification.PluginConfigurationEventHandler;
+import org.killbill.billing.plugin.bigcommerce.dao.BigcommerceDao;
 import org.killbill.billing.plugin.core.config.PluginEnvironmentConfig;
 import org.killbill.billing.plugin.core.resources.jooby.PluginApp;
 import org.killbill.billing.plugin.core.resources.jooby.PluginAppBuilder;
@@ -29,6 +30,8 @@ public class BcActivator extends KillbillActivatorBase {
     public void start(final BundleContext context) throws Exception {
         super.start(context);
 
+        BigcommerceDao bigcommerceDao = new BigcommerceDao(dataSource.getDataSource());
+
         final String region = PluginEnvironmentConfig.getRegion(configProperties.getProperties());
 
         // Register an event listener for plugin configuration (optional)
@@ -44,7 +47,7 @@ public class BcActivator extends KillbillActivatorBase {
 
         // As an example, this plugin registers a PaymentPluginApi (this could be
         // changed to any other plugin api)
-        final PaymentPluginApi paymentPluginApi = new BcPaymentPluginApi(killbillAPI, configProperties.getProperties());
+        final PaymentPluginApi paymentPluginApi = new BcPaymentPluginApi(killbillAPI, bigcommerceDao);
 
         registerPaymentPluginApi(context, paymentPluginApi);
 
@@ -86,8 +89,11 @@ public class BcActivator extends KillbillActivatorBase {
     }
 
     private void registerServlet(final BundleContext context, final Servlet servlet) {
+
         final Hashtable<String, String> props = new Hashtable<String, String>();
+        
         props.put(OSGIPluginProperties.PLUGIN_NAME_PROP, PLUGIN_NAME);
+
         registrar.registerService(context, Servlet.class, servlet, props);
     }
 

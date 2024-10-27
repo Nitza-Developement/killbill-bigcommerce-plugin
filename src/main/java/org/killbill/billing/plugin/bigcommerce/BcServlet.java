@@ -1,5 +1,6 @@
 package org.killbill.billing.plugin.bigcommerce;
 
+import java.sql.SQLException;
 import java.util.Optional;
 import javax.inject.Named;
 import javax.inject.Singleton;
@@ -7,7 +8,13 @@ import javax.inject.Singleton;
 import org.jooby.mvc.GET;
 import org.jooby.mvc.Local;
 import org.jooby.mvc.Path;
+import org.jooby.Result;
+import org.jooby.Results;
 import org.killbill.billing.tenant.api.Tenant;
+import org.killbill.billing.osgi.libs.killbill.OSGIKillbillDataSource;
+import org.killbill.billing.plugin.bigcommerce.dao.BigcommerceDao;
+
+import com.google.inject.Inject;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -17,10 +24,11 @@ import org.slf4j.LoggerFactory;
 public class BcServlet {
 
     private static final Logger logger = LoggerFactory.getLogger(BcServlet.class);
+    private OSGIKillbillDataSource dataSource;
 
-    public BcServlet(
-
-    ) {
+    @Inject
+    public BcServlet( OSGIKillbillDataSource dataSource) {
+        this.dataSource = dataSource;
     }
 
     /**
@@ -30,25 +38,30 @@ public class BcServlet {
      * @param tenant
      */
     @GET
-    public void get(
+    public Result get(
             @Local @Named("killbill_tenant") final Optional<Tenant> tenant,
-            @Named("url") final Optional<String> url
+            @Named("url") final Optional<String> url) {
 
-    ) {
-        // Find me on http://127.0.0.1:8080/plugins/hello-world-plugin
-        logger.info("Hello world");
+        logger.info(dataSource.getDataSource().toString());
 
         if (tenant != null && tenant.isPresent()) {
 
-            logger.info("tenant is available");
+            try {
 
-            Tenant t1 = tenant.get();
+                BigcommerceDao bigcommerceDao = new BigcommerceDao(dataSource.getDataSource());
+                bigcommerceDao.addConfig(tenant.get().getId().toString(), url.get());
 
-            logger.info("tenant id:" + t1.getId());
-        } else {
+            } catch (SQLException e) {
 
-            logger.info("tenant is not available");
+                logger.error(e.getMessage());
+                return Results.with("Error to add config", 500);
+            }
+
+            return Results.ok("Configured URL: " + url.get());
+
         }
+
+        return Results.noContent();
 
     }
 

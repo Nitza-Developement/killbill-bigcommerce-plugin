@@ -19,9 +19,11 @@ public class ApiClient {
     private static final Logger logger = LoggerFactory.getLogger(ApiClient.class);
 
     private final ClientResource client;
+    private final String url;
 
     public ApiClient(final String url) {
         this.client = new ClientResource(url);
+        this.url = url;
     }
 
     public Integer pay(final Map<String, Object> data) {
@@ -34,6 +36,9 @@ public class ApiClient {
             logger.error("Error converting json to string", e);
             return 400;
         }
+
+
+        logger.info("Making payment request to: " + url);
 
         if (jRepresentation != null) {
             try {
