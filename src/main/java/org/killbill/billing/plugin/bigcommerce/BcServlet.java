@@ -27,7 +27,7 @@ public class BcServlet {
     private OSGIKillbillDataSource dataSource;
 
     @Inject
-    public BcServlet( OSGIKillbillDataSource dataSource) {
+    public BcServlet(OSGIKillbillDataSource dataSource) {
         this.dataSource = dataSource;
     }
 
@@ -42,9 +42,7 @@ public class BcServlet {
             @Local @Named("killbill_tenant") final Optional<Tenant> tenant,
             @Named("url") final Optional<String> url) {
 
-        logger.info(dataSource.getDataSource().toString());
-
-        if (tenant != null && tenant.isPresent()) {
+        if (tenant != null && tenant.isPresent() && url != null && url.isPresent()) {
 
             try {
 
