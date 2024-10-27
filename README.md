@@ -46,4 +46,15 @@ docker restart killbill-container
 
 
 ### Configure plugin 
-<!-- TODO -->
+
+1. Create table in killbill database with the following script
+[ddl.sql](src/main/resources/ddl.sql)
+
+2. Set plugin configuration
+
+```console
+curl --request GET \
+  --url 'http://localhost:8080/plugins/bigcommerce-plugin?url=url' \
+  --header 'X-Killbill-ApiKey: Bob' \
+  --header 'X-Killbill-ApiSecret: Lazar'
+```
