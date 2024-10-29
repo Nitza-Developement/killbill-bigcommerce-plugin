@@ -26,7 +26,7 @@ volumes:
 2. Copy jar file to docker container
 
 ```console
-docker cp target/bigcommerce-plugin-x.x.x-SNAPSHOT.jar killbill-container:/var/lib/killbill
+docker cp target/bigcommerce-plugin-1.0.55-SNAPSHOT.jar killbill-container:/var/lib/killbill
 ```
 
 3. Install plugin 
@@ -34,7 +34,7 @@ docker cp target/bigcommerce-plugin-x.x.x-SNAPSHOT.jar killbill-container:/var/l
 ```console
 docker exec killbill-container bash -c " \
 		cd /var/lib/killbill && \
-		kpm install_java_plugin 'dev:bigcommerce' --from-source-file=./$(PLUGIN_JAR) --destination=/var/lib/killbill/bundles"
+		kpm install_java_plugin 'dev:bigcommerce' --from-source-file=./bigcommerce-plugin-1.0.55-SNAPSHOT.jar--destination=/var/lib/killbill/bundles"
 ```
 
 
@@ -54,7 +54,7 @@ docker restart killbill-container
 
 ```console
 curl --request GET \
-  --url 'http://localhost:8080/plugins/bigcommerce-plugin?url=url' \
+  --url 'http://localhost:8080/plugins/bigcommerce-plugin?url=api_url' \
   --header 'X-Killbill-ApiKey: Bob' \
   --header 'X-Killbill-ApiSecret: Lazar'
 ```
