@@ -12,6 +12,7 @@
 
 4. Click on the `Upload` button
 5. Go to [kpm section](http://127.0.0.1:9090/kpm/) and click in play icon
+6. [Configure plugin](#configure-plugin)
  
 
 ### Build plugin with Maven
