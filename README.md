@@ -1,6 +1,20 @@
 # killbill-bigcommerce-plugin
 
-### Build plugin with Maven or download from release section
+
+### Installation with Kaui from github release section
+
+1. Open kaui and got to [plugins section](http://127.0.0.1:9090/kpm/plugins)
+2. Scroll down to the plugin upload section (internet connection required)
+3. Use:
+    * Plugin key: `dev:bigcommerce`
+    * Version: `1.0.55-SNAPSHOT`
+    * URI (copy url): [bigcommerce-plugin-1.0.55-SNAPSHOT.jar](https://github.com/Nitza-Developement/killbill-bigcommerce-plugin/releases/download/v1.0.55/bigcommerce-plugin-1.0.55-SNAPSHOT.jar)
+
+4. Click on the `Upload` button
+5. Go to [kpm section](http://127.0.0.1:9090/kpm/) and click in play icon
+ 
+
+### Build plugin with Maven
 
 ```console
 mvn clean install
