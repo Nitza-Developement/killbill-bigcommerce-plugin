@@ -13,6 +13,7 @@ import org.jooby.Results;
 import org.killbill.billing.tenant.api.Tenant;
 import org.killbill.billing.osgi.libs.killbill.OSGIKillbillDataSource;
 import org.killbill.billing.plugin.bigcommerce.dao.BigcommerceDao;
+import org.jooq.exception.DataAccessException;
 
 import com.google.inject.Inject;
 
@@ -53,6 +54,10 @@ public class BcServlet {
 
                 logger.error(e.getMessage());
                 return Results.with("Error to add config", 500);
+
+            } catch (DataAccessException e) {
+                logger.error(e.getMessage());
+                return Results.with("Create table in killbill database with the following script https://github.com/Nitza-Developement/killbill-bigcommerce-plugin/blob/main/src/main/resources/ddl.sql", 500);
             }
 
             return Results.ok("Configured URL: " + url.get());
