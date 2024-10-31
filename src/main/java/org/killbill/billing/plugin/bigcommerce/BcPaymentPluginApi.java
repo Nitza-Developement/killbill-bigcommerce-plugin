@@ -30,6 +30,8 @@ import org.killbill.billing.invoice.api.InvoiceApiException;
 import org.killbill.billing.util.callcontext.CallContext;
 import org.killbill.billing.util.callcontext.TenantContext;
 import org.killbill.billing.util.entity.Pagination;
+import org.killbill.billing.util.customfield.CustomField;
+import org.killbill.billing.ObjectType;
 
 import org.killbill.billing.plugin.bigcommerce.dao.BigcommerceDao;
 
@@ -94,9 +96,16 @@ public class BcPaymentPluginApi implements PaymentPluginApi {
 
                     String productName = invoiceItem.getProductName();
                     String prettyPlanName = invoiceItem.getPrettyPlanName();
+                    UUID subscriptionId = invoiceItem.getSubscriptionId();
 
                     if (prettyPlanName != null && productName != null) {
-                        Map<String, Object> product = getProduct(productName, prettyPlanName);
+
+                        Map<String, Object> product = getProduct(
+                                productName,
+                                prettyPlanName,
+                                subscriptionId,
+                                context);
+
                         products.add(product);
                     }
 
@@ -163,7 +172,15 @@ public class BcPaymentPluginApi implements PaymentPluginApi {
         return paymentTransactionInfoPlugin;
     }
 
-    public Map<String, Object> getProduct(final String productName, final String prettyPlanName) {
+    public Map<String, Object> getProduct(
+            final String productName,
+            final String prettyPlanName,
+            final UUID subscriptionId,
+            final CallContext context
+
+    ) {
+
+        // quantity
 
         Integer quantity = 1;
         Integer product = Integer.parseInt(productName.split("product-")[1]);
@@ -174,9 +191,30 @@ public class BcPaymentPluginApi implements PaymentPluginApi {
             quantity = 3;
         }
 
+        // instrument_token
+
+        List<CustomField> customFields = killbillAPI.getCustomFieldUserApi()
+                .getCustomFieldsForObject(
+                        subscriptionId,
+                        ObjectType.SUBSCRIPTION,
+                        context);
+
+        String instrumentToken = null;
+
+        for (final CustomField field : customFields) {
+
+            String fieldName = field.getFieldName();
+
+            if ("instrument_token".equals(fieldName)) {
+                instrumentToken = field.getFieldValue();
+            }
+
+        }
+
         Map<String, Object> data = new HashMap<String, Object>();
         data.put("product_id", product);
         data.put("quantity", quantity);
+        data.put("instrument_token", instrumentToken);
 
         return data;
     }
