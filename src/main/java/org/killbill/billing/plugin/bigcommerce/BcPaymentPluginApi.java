@@ -199,14 +199,14 @@ public class BcPaymentPluginApi implements PaymentPluginApi {
                         ObjectType.SUBSCRIPTION,
                         context);
 
-        String instrumentToken = null;
+        Integer orderId = null;
 
         for (final CustomField field : customFields) {
 
             String fieldName = field.getFieldName();
 
-            if ("instrument_token".equals(fieldName)) {
-                instrumentToken = field.getFieldValue();
+            if ("order_id".equals(fieldName)) {
+                orderId = Integer.parseInt(field.getFieldValue());
             }
 
         }
@@ -214,7 +214,7 @@ public class BcPaymentPluginApi implements PaymentPluginApi {
         Map<String, Object> data = new HashMap<String, Object>();
         data.put("product_id", product);
         data.put("quantity", quantity);
-        data.put("instrument_token", instrumentToken);
+        data.put("order_id", orderId);
 
         return data;
     }

@@ -7,8 +7,8 @@
 2. Scroll down to the plugin upload section (internet connection required)
 3. Use:
     * Plugin key: `dev:bigcommerce`
-    * Version: `1.0.55-SNAPSHOT`
-    * URI (copy url): [bigcommerce-plugin-1.0.55-SNAPSHOT.jar](https://github.com/Nitza-Developement/killbill-bigcommerce-plugin/releases/download/v1.0.55/bigcommerce-plugin-1.0.55-SNAPSHOT.jar)
+    * Version: `1.0.64-SNAPSHOT`
+    * URI (copy url): [bigcommerce-plugin-1.0.64-SNAPSHOT.jar](https://github.com/Nitza-Developement/killbill-bigcommerce-plugin/releases/download/v1.0.64/bigcommerce-plugin-1.0.64-SNAPSHOT.jar)
 
 4. Click on the `Upload` button
 5. Go to [kpm section](http://127.0.0.1:9090/kpm/) and click in play icon
@@ -41,7 +41,7 @@ volumes:
 2. Copy jar file to docker container
 
 ```console
-docker cp target/bigcommerce-plugin-1.0.55-SNAPSHOT.jar killbill-container:/var/lib/killbill
+docker cp target/bigcommerce-plugin-1.0.64-SNAPSHOT.jar killbill-container:/var/lib/killbill
 ```
 
 3. Install plugin 
@@ -49,7 +49,7 @@ docker cp target/bigcommerce-plugin-1.0.55-SNAPSHOT.jar killbill-container:/var/
 ```console
 docker exec killbill-container bash -c " \
 		cd /var/lib/killbill && \
-		kpm install_java_plugin 'dev:bigcommerce' --from-source-file=./bigcommerce-plugin-1.0.55-SNAPSHOT.jar--destination=/var/lib/killbill/bundles"
+		kpm install_java_plugin 'dev:bigcommerce' --from-source-file=./bigcommerce-plugin-1.0.64-SNAPSHOT.jar--destination=/var/lib/killbill/bundles"
 ```
 
 
