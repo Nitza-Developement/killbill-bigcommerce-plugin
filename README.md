@@ -67,6 +67,8 @@ docker restart killbill-container
 
 2. Set plugin configuration
 
+- Example api_url : http://192.168.23.46:9000/api/v1/payments/pay
+
 ```console
 curl --request GET \
   --url 'http://localhost:8080/plugins/bigcommerce-plugin?url=api_url' \
